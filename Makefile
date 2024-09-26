@@ -18,9 +18,13 @@ clean:
 
 usb: $(iso)
 	@dd if=$(iso) of=/dev/sdb
+	@sleep 1
 	@eject /dev/sdb
 
 iso: $(iso)
+
+run-dbg: $(iso)
+	@qemu-system-x86_64 -cdrom $(iso)
 
 $(iso): $(kernel) $(grub_cfg)
 	@mkdir -p build/isofiles/boot/grub
