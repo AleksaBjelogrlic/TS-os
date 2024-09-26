@@ -21,10 +21,13 @@ usb: $(iso)
 	@sleep 1
 	@eject /dev/sdb
 
-iso: $(iso)
+run: $(iso)
+	@qemu-system-x86_64 -cdrom $(iso)
 
 run-dbg: $(iso)
-	@qemu-system-x86_64 -cdrom $(iso)
+	@qemu-system-x86_64 -s -S -cdrom $(iso)
+
+iso: $(iso)
 
 $(iso): $(kernel) $(grub_cfg)
 	@mkdir -p build/isofiles/boot/grub

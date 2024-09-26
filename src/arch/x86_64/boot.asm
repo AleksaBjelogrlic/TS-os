@@ -24,11 +24,12 @@ start:
 check_type:
 
     mov edx, [ebx] ; copy data from the address into reg
-    cmp edx, 8 ; check if type is 8 - framebuffer info
+    cmp edx, 8 ; check if type is 8 - framebuffer info    
     jne skip_tag ; if type is not 8 jump to skip_tag
 
-parse_fb_info:
 
+parse_fb_info:
+    
     add ebx, 8 ; increment register to point to u64 framebuffer_addr
     mov edx, [ebx] ; copy framebuffer_addr from the address into reg
     
@@ -60,14 +61,19 @@ fb_write_loop_hopefully:
 
 
 skip_tag:
-    
     add ebx, 4 ; increment address to point at u32 size
     mov edx, [ebx] ; copy tag size data from the address into reg
-    sub edx, 4 ; decrease size by the length of the tag type field
-    add ebx, edx ; increment address by size - 4
+    ; next three instructions are (edx-1)|7 + 1
+    ; this ensures alignment across 8 byte boundaries
+    sub edx, 1
+    or edx, 0x07
+    add edx, 1
+    sub edx, 4 ; decrease size by the length of the tag type field    
+    add ebx, edx ; increment address by size, accounting for 8 byte alignment
     cmp ebx, ecx ; check if we are past end address
     jge error ; if we are, go to error
     jmp check_type ; else go back to check next tag type
 
 error:
+    mov eax, 0xDEADBEEF ; Only useful for the debugger
     hlt
